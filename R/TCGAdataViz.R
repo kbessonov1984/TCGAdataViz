@@ -1,5 +1,6 @@
 #' A function to download patient metadata from TCGA API and filter patients based on tumor_status field
-#' @param url
+#' @param url as url to the data provided by the TCGA project
+#' @return returns raw metadata downlaoded from TCGA resource
 #' @export
 
 url="https://api.gdc.cancer.gov/data/1b5f413e-a8d1-4d10-92eb-7c4ae739ed81"
@@ -13,28 +14,47 @@ getMetaData <- function(url){
   return(data[-filteredPatientsIdx,])
 }
 
-
+#' TCGA metadata filtering and visualization by a boxplot binned by a cancer type.
+#' Filtering is done based on patient ids or cancer typer
+#' @param metadata metadata tibble downladed from getMetaData()
+#' @param cancer_type  a list of cancer types to filter metadata on
+#' @param patients list of TCGA patient ids in TCGA-XX-XXX format to filter metadata on
+#' @param metadata_col optional name of the column as an extra dimension for comparison
+#' @param metadata_levels optional list of categories to filter metadata_col on
+#' @param phenotype name of the phenotype column to extract data from (the y axis of the boxplot)
+#' @return filtered_meta
 getDataViz <- function(metadata,
                        cancer_type=NULL,
-                       patients=NULL,
-                       metadata_col="",
+                       patients=c(),
+                       metadata_col=NULL,
                        metadata_levels = c(),
-                       phenotype = "",
+                       phenotype = NULL
                        ){
 
-  tmp = metadata %>% filter(type == "ACC" | type == "BLCA")
-  p <- ggplot(data=tmp , aes(x=type, y=OS.time))
-  p + geom_boxplot(aes(fill = type))
+  if(!is.null(cancer_type) && length(patients) > 0){
+    stop("\'cancer_typer\' and \'patients\' can not be BOTH defined. Filter data on a single input parameter.Aborting ...")
+  }
+
+  if(!is.null(cancer_type)){
+    filtered_meta = metadata %>% filter(type == cancer_type)
+  }else if(length(patients)>0){
+    cat("Filter by patients")
+    filtered_meta  = metadata %>% filter(bcr_patient_barcode %in% patients)
+  }else{
+    stop("\'cancer_typer\' and \'patients\' input paramters are not defined. Please define either of them. Aborting ...")
+  }
+
+  #make a box plot on selected patients as a function of cancer type
+  if(is.null(metadata_col)){
+    p <- ggplot(data=filtered_meta  , aes_string(x="type", y=phenotype))
+    p + geom_boxplot(aes(fill = type))+theme(axis.text.x = element_text(angle = 0, vjust = 0.5, hjust=1))
+  }else{
+    p <- ggplot(data=filtered_meta , aes_string(x=metadata_col, y=phenotype))
+    p + geom_boxplot(aes(fill = type))+theme(axis.text.x = element_text(angle = 0, vjust = 0.5, hjust=1))
+  }
+
+  return(filtered_meta)
 }
 
-#test
-metadata = getMetaData(url)
-table(metadata[,"tumor_status"])
 
-getDataViz(metadata, phenotype="OS.time")
 
-require(dplyr)
-require(ggplot2)
-tmp = metadata %>% filter(type == "ACC" | type == "BLCA")
-p <- ggplot(data=tmp , aes(x=type, y=OS.time))
-p + geom_boxplot(aes(fill = type))
