@@ -1,9 +1,15 @@
-Package: TCGAVizualizer
-Type: Package
-Title: TCGA data vizualizer
-Author: Kyrylo Bessonov
-Description: A package to download, filter, perform simple cancer data analytics and visualizations
+Package: TCGAdataViz
+Title: Downloads TCGA cancer metadata and performs basic data filtering and visualization
+Version: 1.0
+Authors@R: 
+    person(given = "Kirill",
+           family = "Bessonov",
+           role = c("aut", "cre"),
+           email = "kbessonov@gmail.com",
+           comment = structure("YOUR-ORCID-ID", .Names = "ORCID"))
+Description: TCGAdataViz gets TCGA cancer metadata and performs basic analyses and visualizations
 License: GPL
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.1.0
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.1
