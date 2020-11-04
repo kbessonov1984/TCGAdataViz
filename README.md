@@ -38,3 +38,6 @@ meta4viz <- getDataViz(metadata,patients = as.data.frame(metadata)[1:100,1], phe
 getDataAnalytics(meta4viz,y_variable_name="OS.time",x_variable_name="type")
 getDataAnalytics(meta4viz,y_variable_name="type",x_variable_name="OS.time", analysis_name="t-test")
 ```
+<p align="center">
+<img src="images/Boxplot_example.png" />
+</p>
