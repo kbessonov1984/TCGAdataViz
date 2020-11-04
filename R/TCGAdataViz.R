@@ -3,9 +3,7 @@
 #' @return returns raw metadata downlaoded from TCGA resource
 #' @export
 
-url="https://api.gdc.cancer.gov/data/1b5f413e-a8d1-4d10-92eb-7c4ae739ed81"
-
-getMetaData <- function(url){
+getMetaData <- function(url="https://api.gdc.cancer.gov/data/1b5f413e-a8d1-4d10-92eb-7c4ae739ed81"){
   download.file(url, destfile = "tmp.xlsx", mode="wb")
   data = readxl::read_excel(path="tmp.xlsx", sheet= 1)[-1]
   filteredPatientsIdx = which(is.na(data[,"tumor_status"])  |
@@ -23,6 +21,7 @@ getMetaData <- function(url){
 #' @param metadata_levels optional list of categories to filter metadata_col on
 #' @param phenotype name of the phenotype column to extract data from (the y axis of the boxplot)
 #' @return filtered_meta
+#' @export
 getDataViz <- function(metadata,
                        cancer_type=NULL,
                        patients=c(),
@@ -56,5 +55,28 @@ getDataViz <- function(metadata,
   return(filtered_meta)
 }
 
+#' TCGA metadata statistical significance tests (regression and t-test) to compare patient variables in cancer groups
+#' @param metadata as filtered or unfiltered tibble from getMetaData() or from getDataViz()
+#' @param x_variable_name independent variable of the model (continuous or categorical)
+#' @param y_variable_name dependent variable of the model (continuous or categorical)
+#' @param analysis_name name of analysis (linear regression or a t-test)
+#' @export
+getDataAnalytics <- function(metadata,
+                             x_variable_name,
+                             y_variable_name,
+                             analysis_name="regression"
+                             ){
+  cancer_types = names(table(metadata["type"]))
+  if(analysis_name == "regression"){
+    lm_fit=lm(as.formula(paste(y_variable_name, "~",x_variable_name)), data=metadata)
+    summary(lm_fit)
+  }else if(analysis_name =="t-test" &&  length(cancer_types) == 2){
+   group1 =  metadata %>% filter(type == cancer_types[1]) %>% pull(x_variable_name)
+   group2 =  metadata %>% filter(type == cancer_types[2]) %>% pull(x_variable_name)
+   t.test(group1,group2)
+  }else{
+    stop("Analysis not defined or check spelling")
+  }
 
+}
 
