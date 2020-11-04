@@ -35,9 +35,10 @@ getDataViz <- function(metadata,
   }
 
   if(!is.null(cancer_type)){
+    cat("Filter by cancer type\n")
     filtered_meta = metadata %>% filter(type == cancer_type)
   }else if(length(patients)>0){
-    cat("Filter by patients")
+    cat("Filter by patients\n")
     filtered_meta  = metadata %>% filter(bcr_patient_barcode %in% patients)
   }else{
     stop("\'cancer_typer\' and \'patients\' input paramters are not defined. Please define either of them. Aborting ...")
@@ -46,10 +47,10 @@ getDataViz <- function(metadata,
   #make a box plot on selected patients as a function of cancer type
   if(is.null(metadata_col)){
     p <- ggplot(data=filtered_meta  , aes_string(x="type", y=phenotype))
-    p + geom_boxplot(aes(fill = type))+theme(axis.text.x = element_text(angle = 0, vjust = 0.5, hjust=1))
+    print(p + geom_boxplot(aes(fill = type))+theme(axis.text.x = element_text(angle = 0, vjust = 0.5, hjust=1)))
   }else{
     p <- ggplot(data=filtered_meta , aes_string(x=metadata_col, y=phenotype))
-    p + geom_boxplot(aes(fill = type))+theme(axis.text.x = element_text(angle = 0, vjust = 0.5, hjust=1))
+    print(p + geom_boxplot(aes(fill = type))+theme(axis.text.x = element_text(angle = 0, vjust = 0.5, hjust=1)))
   }
 
   return(filtered_meta)
